@@ -89,7 +89,7 @@ const ShowProductos = () => {
                                             <td>{product.title}</td>
                                             <td>{product.description}</td>
                                             <td>{product.category.name}</td>
-                                            <td>{product.price.toFixed(2)}</td>
+                                            <td>{product.price.toLocaleString('es-HN', { style: 'currency', currency: 'HNL' })}</td>
                                             <td>
                                                 <button onClick={() => openModal(2, product.id, product.title, product.description, product.price) } className='btn btn-warning' data-bs-toggle='modal' data-bs-target='#modalProductos' >
                                                     <i className='fa-solid fa-edit' />

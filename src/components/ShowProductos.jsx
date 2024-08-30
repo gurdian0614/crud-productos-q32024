@@ -53,6 +53,67 @@ const ShowProductos = () => {
         }
     }
 
+    const enviarSolicitud = async (url, metodo, parametros) => {
+        let obj = {
+            method: metodo,
+            url: url,
+            data: parametros,
+            headers: {
+                "Content-Type":"application/json",
+                "Accept":"application/json"
+            }
+        }
+
+        await axios(obj).then(() => {
+            let mensaje
+
+            if (metodo === "POST") {
+                mensaje = 'Se guardó el producto'
+            } else if (metodo === "PUT") {
+                mensaje = 'Se editó el producto'
+            } else if (metodo === "DELETE") {
+                mensaje = 'Se eliminó el producto'
+            }
+            alert(mensaje)
+            document.getElementById('btnCerrarModal').click()
+            getProductos()
+        }).catch((error) => {
+            alert(error.response.data.message)
+        })
+    }
+
+    const validar = () => {
+        let payload
+        let metodo
+        let urlAxios
+
+        if (title === '') {
+            alert('Nombre del producto enm blanco')
+        } else if (description === '') {
+            alert('Descripción del producto enm blanco')
+        } else if (price === '') {
+            alert('Precio del producto enm blanco')
+        } else {
+            payload = {
+                title: title,
+                description: description,
+                price: price,
+                categoryId: 6,
+                images: ['https://c8.alamy.com/compes/r3yw81/el-icono-de-imagen-no-disponible-vector-plana-r3yw81.jpg']
+            }
+
+            if (operation === 1) {
+                metodo = 'POST'
+                urlAxios = 'https://api.escuelajs.co/api/v1/products/'
+            } else {
+                metodo = 'PUT'
+                urlAxios = `https://api.escuelajs.co/api/v1/products/${id}`
+            }
+
+            enviarSolicitud(urlAxios, metodo, payload)
+        }
+    }
+
     return(
         <div className="App">
             <div className="container-fluid">
@@ -130,10 +191,10 @@ const ShowProductos = () => {
                             </div>
                         </div>
                         <div className='modal-footer'>
-                            <button className='btn btn-success'>
+                            <button onClick={() => validar()} className='btn btn-success'>
                                 <i className='fa solid fa-floppy-disk' /> Guardar
                             </button>
-                            <button id='cerrarModal' className='btn btn-danger' data-bs-dismiss='modal' > Cerrar</button>
+                            <button id='btnCerrarModal' className='btn btn-danger' data-bs-dismiss='modal' > Cerrar</button>
                         </div>
                     </div>
                 </div>

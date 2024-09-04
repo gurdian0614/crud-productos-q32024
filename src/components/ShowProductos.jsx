@@ -1,6 +1,9 @@
 
 import React, { useEffect, useState} from 'react'
 import axios from 'axios'
+import { alertaSuccess, alertaError, alertaWarning } from '../funciones'
+import Swal from "sweetalert2"
+import withReactContent from 'sweetalert2-react-content' 
 
 
 const ShowProductos = () => {
@@ -53,7 +56,14 @@ const ShowProductos = () => {
         }
     }
 
-    const enviarSolicitud = async (url, metodo, parametros) => {
+    /**
+     * Permite el uso de la API dependiendo el tipo de operación
+     * 
+     * @param {string} url - URL de la API a consumir
+     * @param {string} metodo - Tipo de método a utilizar: POST, PUT, PATCH o DELETE
+     * @param {JSON} parametros - Objeto JSON que se enviará a la API
+     */
+    const enviarSolicitud = async (url, metodo, parametros = {}) => {
         let obj = {
             method: metodo,
             url: url,
@@ -74,25 +84,28 @@ const ShowProductos = () => {
             } else if (metodo === "DELETE") {
                 mensaje = 'Se eliminó el producto'
             }
-            alert(mensaje)
+            alertaSuccess(mensaje)
             document.getElementById('btnCerrarModal').click()
             getProductos()
         }).catch((error) => {
-            alert(error.response.data.message)
+            alertaError(error.response.data.message)
         })
     }
 
+    /**
+     * Valida que cada uno de los campos del formulario no vayan vacíos
+     */
     const validar = () => {
         let payload
         let metodo
         let urlAxios
 
         if (title === '') {
-            alert('Nombre del producto enm blanco')
+            alertaWarning('Nombre del producto en blanco', 'title')
         } else if (description === '') {
-            alert('Descripción del producto enm blanco')
+            alertaWarning('Descripción del producto en blanco', 'description')
         } else if (price === '') {
-            alert('Precio del producto enm blanco')
+            alertaWarning('Precio del producto en blanco', 'price')
         } else {
             payload = {
                 title: title,
@@ -112,6 +125,33 @@ const ShowProductos = () => {
 
             enviarSolicitud(urlAxios, metodo, payload)
         }
+    }
+
+    /**
+     * Proceso para eliminar un producto
+     * 
+     * @param {Number} id - Identificador del producto a eliminar 
+     */
+    const deleteProducto = (id) => {
+        let urlDelete = `https://api.escuelajs.co/api/v1/products/${id}`
+
+        const MySwal = withReactContent(Swal)
+
+        MySwal.fire({
+            title: '¿Está seguro de eliminar el producto?',
+            icon: 'question',
+            text: 'No habrá marcha atrás',
+            showCancelButton: true,
+            confirmButtonText: 'Si, eliminar',
+            cancelButtonText: 'Cancelar'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                setId(id)
+                enviarSolicitud(urlDelete, 'DELETE')
+            }
+        }).catch((error) => {
+            alertaError(error)
+        })
     }
 
     return(
@@ -155,7 +195,7 @@ const ShowProductos = () => {
                                                 <button onClick={() => openModal(2, product.id, product.title, product.description, product.price) } className='btn btn-warning' data-bs-toggle='modal' data-bs-target='#modalProductos' >
                                                     <i className='fa-solid fa-edit' />
                                                 </button>
-                                                <button className='btn btn-danger' >
+                                                <button onClick={() => deleteProducto(product.id)} className='btn btn-danger' >
                                                     <i className='fa-solid fa-trash' />
                                                 </button>
                                             </td>
